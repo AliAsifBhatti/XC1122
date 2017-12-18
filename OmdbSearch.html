@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>OMDB search</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+
+
+
+
+<body class="panel-body">
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="col-md-4">
+            <input autofocus placeholder="Title of movie" id="movie-title" class="form-control" type="text" />
+        </div>
+        <div class="col-md-2">
+            <button id="search" class="btn btn-default">Search</button>
+        </div>
+    </div>
+
+</div>
+
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-4 " id="movie-panel-1" style="display:none;">
+                <a id="link-1" href="#" onclick="GoToPage();">
+                    <img id="image-1" src="" width="200" height="200" />
+                </a>
+            </div>
+            <div class="col-md-4 " id="movie-panel-2" style="display:none;">
+                <a id="link-2" href="#" onclick="GoToPage();">
+                    <img id="image-2" src="" width="200" height="200" />
+                </a>
+            </div>
+            <div class="col-md-4 " id="movie-panel-3" style="display:none;">
+                <a id="link-3" href="#" onclick="GoToPage();">
+                    <img id="image-3" src="" width="200" height="200" />
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+
+</body>
+</html>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+    var _apiKey = "";
+    function GoToPage(id) {
+        var omdbApi = "http://www.omdbapi.com/?i=" + id + "&apikey=" + _apiKey;
+        $.ajax({
+            url: omdbApi,
+            dataType: 'jsonp',
+            success: function (data) {
+                window.location.href = data.Website;
+            }
+        });
+    }
+    function HideMoviePanel() {
+        $("#movie-panel-1").hide();
+        $("#movie-panel-2").hide();
+        $("#movie-panel-3").hide();
+    }
+
+    $(document).ready(function () {
+        HideMoviePanel();
+        do{
+            _apiKey = window.prompt("Please enter api key", "Text");
+        } while (_apiKey == null || _apiKey == "");
+
+        $("#search").click(function () {
+            HideMoviePanel();
+            var movieTitle =encodeURIComponent($("#movie-title").val());
+            var omdbApi = "http://www.omdbapi.com/?i=tt3896198&apikey=" + _apiKey + "&s=" + movieTitle + "&page=1";
+            $.ajax({
+                url: omdbApi,
+                dataType: 'jsonp',
+                success: function (data) {
+                    var result = data.Search;
+                    if (result.length > 0) {
+                        for (var i = 0; i < result.length && i < 3 ; i++) {
+                            $("#image-" + (i + 1)).attr("src", result[i].Poster);
+                            $("#link-" + (i + 1)).attr("onClick", "javascript: GoToPage('" + result[i].imdbID + "');");
+                            $("#movie-panel-" + (i + 1)).show();
+                        }
+                        
+                    }
+
+                }
+            });
+        });
+
+    });
+
+</script>
