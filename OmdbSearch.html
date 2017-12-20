@@ -5,97 +5,61 @@
     <meta charset="utf-8" />
     <title>OMDB search</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-</head>
-
-
-
-
-<body class="panel-body">
-
+</head> 
+<body ng-app="myApp" ng-controller="myCtrl" class="panel-body"> 
 <div class="row">
     <div class="col-md-6">
         <div class="col-md-4">
-            <input autofocus placeholder="Title of movie" id="movie-title" class="form-control" type="text" />
+            <input autofocus placeholder="Title of movie"  ng-model="searchQuery" class="form-control" type="text" />
         </div>
         <div class="col-md-2">
-            <button id="search" class="btn btn-default">Search</button>
+            <button id="search" class="btn btn-default" ng-click="searchResult()">Search</button>
+        </div>
+    </div> 
+</div> 
+ 
+<div class="panel-body" ng-cloak>
+        <div class="row" >
+            <div class="col-md-4 " ng-repeat="record in myQueryResult.Search | limitTo:3" ng-show="myQueryResult.Search.length > 0">
+                <a  href="#" ng-click="GoToPage(record.imdbID);">
+                    <img  ng-src="{{record.Poster}}" width="200"  />
+                </a> 
+            </div> 
+			<div>
+ 			<p>{{myQueryResult.Error}}</p>
+			</div>
         </div>
     </div>
-
-</div>
-
-    <div class="panel-body">
-        <div class="row">
-            <div class="col-md-4 " id="movie-panel-1" style="display:none;">
-                <a id="link-1" href="#" onclick="GoToPage();">
-                    <img id="image-1" src="" width="200" height="200" />
-                </a>
-            </div>
-            <div class="col-md-4 " id="movie-panel-2" style="display:none;">
-                <a id="link-2" href="#" onclick="GoToPage();">
-                    <img id="image-2" src="" width="200" height="200" />
-                </a>
-            </div>
-            <div class="col-md-4 " id="movie-panel-3" style="display:none;">
-                <a id="link-3" href="#" onclick="GoToPage();">
-                    <img id="image-3" src="" width="200" height="200" />
-                </a>
-            </div>
-
-        </div>
-    </div>
-
 
 </body>
 </html>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <script>
     var _apiKey = "";
-    function GoToPage(id) {
-        var omdbApi = "http://www.omdbapi.com/?i=" + id + "&apikey=" + _apiKey;
-        $.ajax({
-            url: omdbApi,
-            dataType: 'jsonp',
-            success: function (data) {
-                window.location.href = data.Website;
-            }
-        });
-    }
-    function HideMoviePanel() {
-        $("#movie-panel-1").hide();
-        $("#movie-panel-2").hide();
-        $("#movie-panel-3").hide();
-    }
-
-    $(document).ready(function () {
-        HideMoviePanel();
-        do{
+     $(document).ready(function () { 
+	  do{
             _apiKey = window.prompt("Please enter api key", "Text");
         } while (_apiKey == null || _apiKey == "");
-
-        $("#search").click(function () {
-            HideMoviePanel();
-            var movieTitle =encodeURIComponent($("#movie-title").val());
-            var omdbApi = "http://www.omdbapi.com/?i=tt3896198&apikey=" + _apiKey + "&s=" + movieTitle + "&page=1";
-            $.ajax({
-                url: omdbApi,
-                dataType: 'jsonp',
-                success: function (data) {
-                    var result = data.Search;
-                    if (result.length > 0) {
-                        for (var i = 0; i < result.length && i < 3 ; i++) {
-                            $("#image-" + (i + 1)).attr("src", result[i].Poster);
-                            $("#link-" + (i + 1)).attr("onClick", "javascript: GoToPage('" + result[i].imdbID + "');");
-                            $("#movie-panel-" + (i + 1)).show();
-                        }
-                        
-                    }
-
-                }
-            });
-        });
-
-    });
-
+	 })
+	var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $http) {
+ 
+ $scope.searchResult=function(){   
+  var movieTitle = $scope.searchQuery;
+  var omdbApi = "http://www.omdbapi.com/?i=tt3896198&apikey=" + _apiKey + "&s=" + movieTitle + "&page=1";
+  $http.get(omdbApi) 
+   .then(function(response) {  
+       $scope.myQueryResult = response.data;
+   }); 
+ } 
+ $scope.GoToPage=function(imdbID){  
+ var omdbApi = "http://www.omdbapi.com/?i=" + imdbID + "&apikey=" + _apiKey;
+  $http.get(omdbApi) 
+   .then(function(response) {   
+       window.location.href = response.data.Website;
+   });
+ }
+}); 
 </script>

@@ -46,6 +46,19 @@ namespace BeerService.Controllers
             }
             return Ok(beerList);
         }
+
+        /// <summary>
+        /// This method is used to update the rating of a specific beer
+        /// </summary>
+        /// <param name="beer"></param>
+        public void UpdateRating(Beer beer)
+        {
+            var obj = _beerList.FirstOrDefault(x => x.Name == beer.Name && x.Type == beer.Type);
+            if (obj != null)
+            {
+                obj.Rating = (int)_beerList.Average(x => x.Rating);
+            }
+        }
     }
 
 
